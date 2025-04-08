@@ -4,10 +4,8 @@ import numpy as np
 import os
 import csv
 
-# MediaPipe Holistic 설정
 mp_holistic = mp.solutions.holistic
 
-# 지원 확장자
 SUPPORTED_EXTS = ('.mp4', '.avi', '.mts', '.MTS', '.mov', '.MOV')
 
 # 좌표 추출
@@ -31,21 +29,18 @@ def extract_holistic_landmarks(video_path):
 
         frame_landmarks = []
 
-        # POSE: 33개
         if results.pose_landmarks:
             for lm in results.pose_landmarks.landmark:
                 frame_landmarks.extend([lm.x, lm.y, lm.z])
         else:
             frame_landmarks.extend([0.0] * 33 * 3)
 
-        # LEFT HAND: 21개
         if results.left_hand_landmarks:
             for lm in results.left_hand_landmarks.landmark:
                 frame_landmarks.extend([lm.x, lm.y, lm.z])
         else:
             frame_landmarks.extend([0.0] * 21 * 3)
 
-        # RIGHT HAND: 21개
         if results.right_hand_landmarks:
             for lm in results.right_hand_landmarks.landmark:
                 frame_landmarks.extend([lm.x, lm.y, lm.z])
@@ -58,7 +53,6 @@ def extract_holistic_landmarks(video_path):
     holistic.close()
     return np.array(all_landmarks)
 
-# 전체 폴더 순회 및 저장
 def process_all_videos(root_folder, output_folder, label_csv_path):
     os.makedirs(output_folder, exist_ok=True)
     label_records = []
@@ -73,12 +67,10 @@ def process_all_videos(root_folder, output_folder, label_csv_path):
             if file_name.endswith(SUPPORTED_EXTS):
                 video_path = os.path.join(sub_path, file_name)
 
-                # 고유 이름 만들기
                 video_id = os.path.splitext(file_name)[0]
                 save_name = f"{video_id}.npy"
                 save_path = os.path.join(output_folder, save_name)
 
-                # 이미 처리된 파일은 건너뜀
                 if save_name in existing_files:
                     print(f"⏭ 이미 존재함, 건너뜀: {save_name}")
                     continue
@@ -95,7 +87,6 @@ def process_all_videos(root_folder, output_folder, label_csv_path):
                 except Exception as e:
                     print(f"❌ 실패: {video_path} - {e}")
 
-    # CSV 저장
     with open(label_csv_path, mode='a', newline='') as f:
         writer = csv.writer(f)
         if os.stat(label_csv_path).st_size == 0:
